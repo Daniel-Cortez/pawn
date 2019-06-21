@@ -1334,6 +1334,7 @@ static int hier2(value *lval)
         #else
           #error Unsupported cell size
         #endif
+        assert_static(sizeof(lval->constval)==sizeof(*f));
         *f= - *f; /* this modifies lval->constval */
       } else {
         /* the negation of a fixed point number is just an integer negation */
@@ -1343,7 +1344,7 @@ static int hier2(value *lval)
       lval->ident=iEXPRESSION;
       lval->constval=0;
     } else {
-      neg();                    /* arithmic negation */
+      neg();                    /* arithmetic negation */
       lval->constval=-lval->constval;
       if (lval->ident==iVARIABLE || lval->ident==iARRAYCELL)
         lval->ident=iEXPRESSION;
