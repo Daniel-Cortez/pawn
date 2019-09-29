@@ -3202,8 +3202,6 @@ static int getstates(const char *funcname)
 static void attachstatelist(symbol *sym, int state_id)
 {
   assert(sym!=NULL);
-  if ((sym->usage & uDEFINE)!=0 && (sym->states==NULL || state_id==0))
-    error(21,sym->name); /* function already defined, either without states or the current definition has no states */
 
   if (state_id!=0) {
     /* add the state list id */
@@ -3915,16 +3913,18 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int fsto
   state_id=getstates(symbolname);
   if (state_id>0 && (opertok!=0 || strcmp(symbolname,uMAINFUNC)==0))
     error(82);          /* operators may not have states, main() may neither */
-  attachstatelist(sym,state_id);
   /* "declargs()" found the ")"; if a ";" appears after this, it was a
    * prototype */
   if (matchtoken(';')) {
     sym->usage|=uFORWARD;
     if (!sc_needsemicolon)
       error(218);       /* old style prototypes used with optional semicolons */
+    if (state_id!=0)
+      error(231);       /* state specification on forward declaration is ignored */
     delete_symbols(&loctab,0,TRUE,TRUE);  /* prototype is done; forget everything */
     return TRUE;
   } /* if */
+  attachstatelist(sym,state_id);
   /* so it is not a prototype, proceed */
   if (((sym->usage & uDECLPUBLIC)!=0 && !fpublic) || ((sym->usage & uDECLSTATIC)!=0 && !fstatic)
       || ((sym->usage & uSTOCK)!=0 && !fstock))
@@ -3936,6 +3936,8 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int fsto
     cidx=code_idx;
     glbdecl=glb_declared;
   } /* if */
+  if ((sym->usage & uDEFINE)!=0 && (sym->states==NULL || state_id==0))
+    error(21,sym->name); /* function already defined, either without states or the current definition has no states */
   if ((sym->flags & flagDEPRECATED)!=0 && fpublic) {
     char *ptr= (sym->documentation!=NULL) ? sym->documentation : "";
     error(234,symbolname,ptr);  /* deprecated (definitely a public function) */
