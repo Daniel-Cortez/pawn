@@ -5836,6 +5836,7 @@ static void doswitch(void)
   int lbl_table,lbl_exit,lbl_case;
   int swdefault,casecount;
   int tok,endtok;
+  int swtag,csetag;
   cell val;
   char *str;
   constvalue_root caselist = { NULL, NULL};   /* case list starts empty */
@@ -5843,7 +5844,7 @@ static void doswitch(void)
   char labelname[sNAMEMAX+1];
 
   endtok= matchtoken('(') ? ')' : tDO;
-  doexpr(TRUE,FALSE,FALSE,FALSE,NULL,NULL,TRUE);/* evaluate switch expression */
+  doexpr(TRUE,FALSE,FALSE,FALSE,&swtag,NULL,TRUE);/* evaluate switch expression */
   needtoken(endtok);
   /* generate the code for the switch statement, the label is the address
    * of the case table (to be generated later).
@@ -5882,7 +5883,8 @@ static void doswitch(void)
          *     parse all expressions until that special token.
          */
 
-        constexpr(&val,NULL,NULL);
+        constexpr(&val,&csetag,NULL);
+        check_tagmismatch(swtag,csetag,TRUE,-1);
         /* Search the insertion point (the table is kept in sorted order, so
          * that advanced abstract machines can sift the case table with a
          * binary search). Check for duplicate case values at the same time.
@@ -5906,9 +5908,10 @@ static void doswitch(void)
           caselist.first=newval;
         if (matchtoken(tDBLDOT)) {
           cell end;
-          constexpr(&end,NULL,NULL);
+          constexpr(&end,&csetag,NULL);
           if (end<=val)
             error(50);                  /* invalid range */
+          check_tagmismatch(swtag,csetag,TRUE,-1);
           while (++val<=end) {
             casecount++;
             /* find the new insertion point */
