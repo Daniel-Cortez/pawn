@@ -7749,6 +7749,7 @@ static void dobreak(void)
   if (ptr==NULL)
     return;
   destructsymbols(&loctab,ptr[wqLVL]);
+  clearassignments(&loctab);
   modstk(((int)declared-ptr[wqBRK])*sizeof(cell));
   jumplabel(ptr[wqEXIT]);
 }
@@ -7762,6 +7763,7 @@ static void docont(void)
   if (ptr==NULL)
     return;
   destructsymbols(&loctab,ptr[wqLVL]);
+  clearassignments(&loctab);
   modstk(((int)declared-ptr[wqCONT])*sizeof(cell));
   jumplabel(ptr[wqLOOP]);
 }
