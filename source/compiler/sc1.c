@@ -4295,6 +4295,7 @@ static void doarg(char *name,int ident,int offset,int tags[],int numtags,
         argsym->usage|=uWRITTEN;
     } else if (argsym->ident==iVARIABLE) {
       argsym->usage|=uASSIGNED;
+      argsym->assignlevel=1;
     } /* if */
 
     if (fconst)
@@ -5444,10 +5445,14 @@ static void statement(int *lastindent,int allow_decl)
   /* fallthrough */
   default:          /* non-empty expression */
     sc_allowproccall=optproccall;
+    if (!allow_decl)
+      pc_nestlevel++;
     lexpush();      /* analyze token later */
     doexpr(TRUE,TRUE,TRUE,TRUE,NULL,NULL,FALSE,NULL);
     needtoken(tTERM);
     lastst=tEXPR;
+    if (!allow_decl)
+      pc_nestlevel--;
     sc_allowproccall=FALSE;
   } /* switch */
 }
