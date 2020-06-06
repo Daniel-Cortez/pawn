@@ -5801,6 +5801,7 @@ static int dofor(void)
   assert(ptr!=NULL);
   ptr[wqBRK]=(int)declared;
   ptr[wqCONT]=(int)declared;
+  ptr[wqLVL]=nestlevel+1;
   jumplabel(skiplab);               /* skip expression 3 1st time */
   setlabel(wq[wqLOOP]);             /* "continue" goes to this label: expr3 */
   setline(TRUE);
@@ -7747,7 +7748,7 @@ static void dobreak(void)
   needtoken(tTERM);
   if (ptr==NULL)
     return;
-  destructsymbols(&loctab,nestlevel);
+  destructsymbols(&loctab,ptr[wqLVL]);
   modstk(((int)declared-ptr[wqBRK])*sizeof(cell));
   jumplabel(ptr[wqEXIT]);
 }
@@ -7760,7 +7761,7 @@ static void docont(void)
   needtoken(tTERM);
   if (ptr==NULL)
     return;
-  destructsymbols(&loctab,nestlevel);
+  destructsymbols(&loctab,ptr[wqLVL]);
   modstk(((int)declared-ptr[wqCONT])*sizeof(cell));
   jumplabel(ptr[wqLOOP]);
 }
@@ -7926,6 +7927,7 @@ static void addwhile(int *ptr)
   ptr[wqCONT]=(int)declared;    /* for "continue", possibly adjusted later */
   ptr[wqLOOP]=getlabel();
   ptr[wqEXIT]=getlabel();
+  ptr[wqLVL]=nestlevel+1;
   if (wqptr>=(wq+wqTABSZ-wqSIZE))
     error(102,"loop table");    /* loop table overflow (too many active loops)*/
   k=0;
