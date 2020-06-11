@@ -128,7 +128,7 @@ static int doif(void);
 static int dowhile(void);
 static int dodo(void);
 static int dofor(void);
-static void doswitch(void);
+static int doswitch(void);
 static void dogoto(void);
 static void dolabel(void);
 static int isterminal(int tok);
@@ -5429,8 +5429,7 @@ static void statement(int *lastindent,int allow_decl)
     lastst=dofor();
     break;
   case tSWITCH:
-    doswitch();
-    lastst=tSWITCH;
+    lastst=doswitch();
     break;
   case tCASE:
   case tDEFAULT:
@@ -5934,16 +5933,18 @@ static int dofor(void)
  *   param = table offset (code segment)
  *
  */
-static void doswitch(void)
+static int doswitch(void)
 {
   int lbl_table,lbl_exit,lbl_case;
   int swdefault,casecount;
   int tok,endtok;
   int swtag,csetag;
+
   int ident;
   int enumsymcount,diff;
   int save_fline;
   symbol *enumsym,*csesym;
+  int allterminal;
   cell val;
   char *str;
   constvalue_root caselist = { NULL, NULL};   /* case list starts empty */
@@ -5982,6 +5983,7 @@ static void doswitch(void)
   } /* if */
   lbl_exit=getlabel();          /* get label number for jumping out of switch */
   swdefault=FALSE;
+  allterminal=TRUE;             /* assume that all cases end with terminal statements */
   casecount=0;
   do {
     tok=lex(&val,&str);         /* read in (new) token */
@@ -6061,6 +6063,7 @@ static void doswitch(void)
       setlabel(lbl_case);
       statement(NULL,FALSE);
       jumplabel(lbl_exit);
+      allterminal &= isterminal(lastst);
       break;
     case tDEFAULT:
       if (casecount!=0)
@@ -6077,6 +6080,7 @@ static void doswitch(void)
        * clause of the switch and the exit label.
        */
       jumplabel(lbl_exit);
+      allterminal &= isterminal(lastst);
       break;
     default:
       if (tok!=endtok) {
@@ -6135,6 +6139,8 @@ static void doswitch(void)
 
   setlabel(lbl_exit);
   delete_consttable(&caselist); /* clear list of case labels */
+
+  return (swdefault && allterminal) ? tTERMINAL : tSWITCH;
 }
 
 static void doassert(void)
