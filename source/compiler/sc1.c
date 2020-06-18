@@ -3028,7 +3028,7 @@ static void decl_enum(int vclass,int fstatic)
     if (enumsym)
       enumsym->child=sym;
     if (vclass==sLOCAL)
-      sym->compound=nestlevel;
+      sym->compound=pc_nestlevel;
 
     if (fstatic)
       sym->fnumber=filenum;
@@ -5902,6 +5902,7 @@ static void doswitch(void)
   int swdefault,casecount;
   int tok,endtok;
   int swtag,csetag;
+  int ident;
   cell val;
   char *str;
   constvalue_root caselist = { NULL, NULL};   /* case list starts empty */
@@ -5910,7 +5911,9 @@ static void doswitch(void)
   assigninfo *assignments=NULL;
 
   endtok= matchtoken('(') ? ')' : tDO;
-  doexpr(TRUE,FALSE,FALSE,FALSE,&swtag,NULL,TRUE,NULL);/* evaluate switch expression */
+  ident=doexpr(TRUE,FALSE,FALSE,FALSE,&swtag,NULL,TRUE,NULL);   /* evaluate switch expression */
+  if (ident==iCONSTEXPR)
+    error(243);                 /* redundant code: switch control expression is constant */
   needtoken(endtok);
   /* generate the code for the switch statement, the label is the address
    * of the case table (to be generated later).
