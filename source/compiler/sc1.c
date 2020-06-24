@@ -2913,7 +2913,8 @@ static void decl_enum(int vclass,int fstatic)
   cell val,value,size;
   char *str;
   int tag,explicittag;
-  cell increment,multiplier;
+  int inctok;
+  cell increment;
   constvalue_root *enumroot=NULL;
   symbol *enumsym=NULL;
   short filenum;
@@ -2943,18 +2944,18 @@ static void decl_enum(int vclass,int fstatic)
     enumname[0]='\0';
   } /* if */
 
-  /* get increment and multiplier */
+  /* get the increment */
   increment=1;
-  multiplier=1;
+  inctok=taADD;
   if (matchtoken('(')) {
-    if (matchtoken(taADD)) {
+    int tok=lex(&val,&str);
+    if (tok==taADD || tok==taMULT || tok==taSHL) {
+      inctok=tok;
       constexpr(&increment,NULL,NULL);
-    } else if (matchtoken(taMULT)) {
-      constexpr(&multiplier,NULL,NULL);
-    } else if (matchtoken(taSHL)) {
-      constexpr(&val,NULL,NULL);
-      while (val-->0)
-        multiplier*=2;
+      if (tok==taSHL && increment<0)
+        increment=0;
+    } else {
+      lexpush();
     } /* if */
     needtoken(')');
   } /* if */
@@ -2990,7 +2991,7 @@ static void decl_enum(int vclass,int fstatic)
     } else {
       constname[0]='\0';
     } /* if */
-    size=increment;                     /* default increment of 'val' */
+    size=(inctok==taADD) ? increment : 1;/* default increment of 'val' */
     fieldtag=0;                         /* default field tag */
     if (matchtoken('[')) {
       constexpr(&size,&fieldtag,NULL);  /* get size */
@@ -3012,6 +3013,8 @@ static void decl_enum(int vclass,int fstatic)
     sym->parent=enumsym;
     if (enumsym)
       enumsym->child=sym;
+    if (vclass==sLOCAL)
+      sym->compound=nestlevel;
 
     if (fstatic)
       sym->fnumber=filenum;
@@ -3021,10 +3024,12 @@ static void decl_enum(int vclass,int fstatic)
       sym->usage |= uENUMFIELD;
       append_constval(enumroot,constname,value,tag);
     } /* if */
-    if (multiplier==1)
+    if (inctok==taADD)
       value+=size;
-    else
-      value*=size*multiplier;
+    else if (inctok==taMULT)
+      value*=(size*increment);
+    else // taSHL
+      value*=(size << increment);
   } while (matchtoken(','));
   needtoken('}');       /* terminates the constant list */
   matchtoken(';');      /* eat an optional ; */
