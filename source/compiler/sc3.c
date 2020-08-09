@@ -1158,6 +1158,20 @@ static int hier13(value *lval)
     } /* if */
     /* ??? if both are arrays, should check dimensions */
     check_tagmismatch(lval->tag,lval2.tag,FALSE,-1); /* tagname mismatch ('true' and 'false' expressions) */
+    if (array1 && array2) {
+      cell len1=lval->constval;
+      cell len2=lval2.constval;
+      if (len1<0)       /* if the size is negative, it means it's a string literal */
+        len1=-len1;
+      else if (len1==0) /* otherwise, if the size is 0, it's an array symbol */
+        len1=lval->sym->dim.array.length;
+      if (len2<0)
+        len2=-len2;
+      else if (len2==0)
+        len2=lval2.sym->dim.array.length;
+      if (len2>len1)
+        *lval=lval2;
+    } /* if */
     setlabel(flab2);
     if (sc_status==statFIRST) {
       /* Calculate the max. heap space used by either branch and save values of
