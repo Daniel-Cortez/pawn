@@ -958,6 +958,8 @@ SC_VDECL int pc_naked;        /* if true mark following function as naked */
 SC_VDECL int pc_compat;       /* running in compatibility mode? */
 SC_VDECL int pc_recursion;    /* enable detailed recursion report? */
 SC_VDECL int pc_nestlevel;    /* number of active (open) compound statements */
+SC_VDECL int pc_retexpr;      /* true if the current expression is a part of a "return" statement */
+SC_VDECL int pc_retheap;      /* heap space (in bytes) to be manually freed when returning an array returned by another function */
 
 SC_VDECL constvalue_root sc_automaton_tab; /* automaton table */
 SC_VDECL constvalue_root sc_state_tab;     /* state table */
