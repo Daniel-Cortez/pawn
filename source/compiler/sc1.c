@@ -2928,7 +2928,7 @@ static void decl_enum(int vclass,int fstatic)
   int tag,explicittag;
   int unique;
   int inctok;
-  int overflow;
+  int warn_overflow;
   cell increment;
   constvalue_root *enumroot=NULL;
   symbol *enumsym=NULL;
@@ -3001,7 +3001,7 @@ static void decl_enum(int vclass,int fstatic)
   needtoken('{');
   /* go through all constants */
   value=0;                              /* default starting value */
-  overflow=FALSE;
+  warn_overflow=FALSE;
   do {
     int idxtag,fieldtag;
     int symline;
@@ -3026,11 +3026,12 @@ static void decl_enum(int vclass,int fstatic)
     } /* if */
     if (matchtoken('=')) {
       constexpr(&value,NULL,NULL);      /* get value */
-      overflow=FALSE;
-    } else if (overflow) {
+      warn_overflow=FALSE;
+    } else if (warn_overflow) {
       errorset(sSETPOS,symline);
       error(242,constname);             /* shift overflow for enum item */
       errorset(sSETPOS,-1);
+      warn_overflow=FALSE;
     } /* if */
     /* add_constant() checks whether a variable (global or local) or
      * a constant with the same name already exists
@@ -3074,7 +3075,7 @@ static void decl_enum(int vclass,int fstatic)
       value*=(size*increment);
     } else { // taSHL
       if ((ucell)value>=((ucell)1 << (PAWN_CELL_SIZE-increment)))
-        overflow=TRUE;
+        warn_overflow=TRUE;
       value*=(size << increment);
     } /* if */
   } while (matchtoken(','));
