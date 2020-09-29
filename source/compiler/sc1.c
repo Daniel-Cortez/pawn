@@ -3051,8 +3051,6 @@ static void decl_enum(int vclass,int fstatic)
       sym->parent=enumsym;
       if (enumsym)
         enumsym->child=sym;
-      if (vclass==sLOCAL)
-        sym->compound=pc_nestlevel;
 
       if (fstatic)
         sym->fnumber=filenum;
