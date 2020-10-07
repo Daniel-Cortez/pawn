@@ -100,6 +100,8 @@ SC_VDEFINE int pc_recursion=FALSE;          /* enable detailed recursion report?
 SC_VDEFINE int pc_nestlevel=0;              /* number of active (open) compound statements */
 SC_VDEFINE int pc_retexpr=FALSE;            /* true if the current expression is a part of a "return" statement */
 SC_VDEFINE int pc_retheap=0;                /* heap space (in bytes) to be manually freed when returning an array returned by another function */
+SC_VDEFINE int pc_loopcond=FALSE;           /* true if the current expression is a loop condition */
+SC_VDEFINE int pc_numloopvars=0;            /* number of variables used inside a loop condition */
 
 SC_VDEFINE char *sc_tokens[] = {
   "*=", "/=", "%=", "+=", "-=", "<<=", ">>>=", ">>=", "&=", "^=", "|=",
