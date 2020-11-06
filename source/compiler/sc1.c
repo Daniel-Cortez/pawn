@@ -6177,8 +6177,9 @@ static int doswitch(void)
       /* check if the value of this constant is handled in switch, if so - continue */
       if (find_constval_byval(&caselist,val->value)!=NULL)
         continue;
+      errorset(sSETPOS,save_fline);
       error(244,val->name); /* enum element not handled in switch */
-      /*  */
+      errorset(sSETPOS,-1);
     } /* while */
   } /* if */
 
