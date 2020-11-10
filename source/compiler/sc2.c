@@ -3091,13 +3091,6 @@ static symbol *find_symbol(const symbol *root,const char *name,int fnumber,int a
   return firstmatch;
 }
 
-static symbol *find_symbol_child(const symbol *root,const symbol *sym)
-{
-  if (sym->child && sym->child->parent==sym)
-    return sym->child;
-  return NULL;
-}
-
 /* Adds "bywhom" to the list of referrers of "entry". Typically,
  * bywhom will be the function that uses a variable or that calls
  * the function.
@@ -3311,16 +3304,6 @@ SC_FUNC symbol *findconst(const char *name,int *cmptag)
     return NULL;
   assert(sym->parent==NULL || (sym->usage & uENUMFIELD)!=0);
   /* ^^^ constants have no hierarchy, but enumeration fields may have a parent */
-  return sym;
-}
-
-SC_FUNC symbol *finddepend(const symbol *parent)
-{
-  symbol *sym;
-
-  sym=find_symbol_child(&loctab,parent);    /* try local symbols first */
-  if (sym==NULL)                            /* not found */
-    sym=find_symbol_child(&glbtab,parent);
   return sym;
 }
 
