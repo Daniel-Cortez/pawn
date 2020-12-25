@@ -3674,11 +3674,13 @@ static void funcstub(int fnative)
   int numdim;
   symbol *sym,*sub;
   int opertok;
+  short filenum;
 
   opertok=0;
   lastst=0;
   litidx=0;                     /* clear the literal pool */
   assert(loctab.next==NULL);    /* local symbol table should be empty */
+  filenum=fcurrent;             /* save file number at the start of the declaration */
 
   tag=pc_addtag(NULL);			/* get the tag of the return value */
   numdim=0;
@@ -3734,8 +3736,16 @@ static void funcstub(int fnative)
   if (fnative) {
     sym->usage=(short)(uNATIVE | uRETVALUE | uDEFINE | (sym->usage & uPROTOTYPED));
     sym->x.lib=curlibrary;
-  } else if (fpublic && opertok==0) {
-    sym->usage|=uPUBLIC;
+  } else {
+    if (((sym->usage & uPUBLIC)!=0 && !fpublic) || (sym->fnumber!=-1 && !fstatic)
+        || ((sym->usage & uSTOCK)!=0 && !fstock))
+      error(25);                /* function heading differs from prototype */
+    if (fpublic && opertok==0)
+      sym->usage|=uPUBLIC;
+    if (fstatic)
+      sym->fnumber=filenum;
+    if (fstock)
+      sym->usage|=uSTOCK;
   } /* if */
   sym->usage|=uFORWARD;
   check_reparse(sym);
@@ -3867,10 +3877,15 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int stoc
   sym=fetchfunc(symbolname,tag);/* get a pointer to the function entry */
   if (sym==NULL || (sym->usage & uNATIVE)!=0)
     return TRUE;                /* it was recognized as a function declaration, but not as a valid one */
+  if (((sym->usage & uPUBLIC)!=0 && !fpublic) || (sym->fnumber!=-1 && !fstatic)
+      || ((sym->usage & uSTOCK)!=0 && !stock))
+    error(25);                  /* function heading differs from prototype */
   if (fpublic && opertok==0)
     sym->usage|=uPUBLIC;
   if (fstatic)
     sym->fnumber=filenum;
+  if (stock)
+    sym->usage|=uSTOCK;
   check_reparse(sym);
   /* we want public functions to be explicitly prototyped, as they are called
    * from the outside
@@ -3921,8 +3936,6 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int stoc
   } /* if */
   begcseg();
   sym->usage|=uDEFINE;  /* set the definition flag */
-  if (stock)
-    sym->usage|=uSTOCK;
   if (opertok!=0 && opererror)
     sym->usage &= ~uDEFINE;
   /* if the function has states, dump the label to the start of the function */
