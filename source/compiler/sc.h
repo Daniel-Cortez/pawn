@@ -230,6 +230,11 @@ typedef struct s_symbol {
 #define uRETNONE    0x010
 /* uASSIGNED indicates that a value assigned to the variable is not used yet */
 #define uASSIGNED   0x080
+/* function is declared/defined with the "static" specifier; this flag is being
+ * reset before the next compilation pass so "forward" declarations won't be
+ * required to have this specifier if the function was defined/re-declared with
+ * it only later */
+#define uSTATIC     0x200
 
 #define flagDEPRECATED 0x01  /* symbol is deprecated (avoid use) */
 #define flagNAKED     0x10  /* function is naked */
