@@ -234,7 +234,15 @@ typedef struct s_symbol {
  * reset before the next compilation pass so "forward" declarations won't be
  * required to have this specifier if the function was defined/re-declared with
  * it only later */
-#define uSTATIC     0x200
+#define uDECLSTATIC 0x200
+ /* function is declared/defined with the "public" specifier; this flag is
+  * similar to "uPUBLIC", except that it's being reset before the next
+  * compilation pass so "forward" declarations won't be required to have this
+  * specifier if the function was defined/re-declared with it only later
+  * (the original "uPUBLIC" flag can't be reset at the end of compilation pass,
+  * as later it's used for generation of the table of public functions and the
+  * stubs for state functions) */
+#define uDECLPUBLIC 0x800
 
 #define flagDEPRECATED 0x01  /* symbol is deprecated (avoid use) */
 #define flagNAKED     0x10  /* function is naked */
