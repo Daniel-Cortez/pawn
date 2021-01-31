@@ -1010,7 +1010,7 @@ SC_VDECL int pc_recursion;    /* enable detailed recursion report? */
 SC_VDECL int pc_nestlevel;    /* number of active (open) compound statements */
 SC_VDECL int pc_retexpr;      /* true if the current expression is a part of a "return" statement */
 SC_VDECL int pc_retheap;      /* heap space (in bytes) to be manually freed when returning an array returned by another function */
-SC_VDECL int pc_loopcond;     /* true if the current expression is a loop condition */
+SC_VDECL int pc_loopcond;     /* equals to 'tFOR', 'tWHILE' or 'tDO' if the current expression is a loop condition, zero otherwise */
 SC_VDECL int pc_numloopvars;  /* number of variables used inside a loop condition */
 
 SC_VDECL char *sc_tokens[];
