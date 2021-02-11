@@ -3682,6 +3682,13 @@ static void funcstub(int fnative)
   assert(loctab.next==NULL);    /* local symbol table should be empty */
   filenum=fcurrent;             /* save file number at the start of the declaration */
 
+  getclassspec(0,&fpublic,&fstatic,&fstock,&fconst);
+  /* a combination of 'public' and 'stock' is already checked in getclassspec() */
+  if (fnative && (fpublic || fstatic || fstock) || (fpublic && fstock))
+    error(42);                  /* invalid combination of class specifiers */
+  else if (fconst)
+    error(10);                  /* illegal function or declaration */
+
   tag=pc_addtag(NULL);			/* get the tag of the return value */
   numdim=0;
   while (matchtoken('[')) {
@@ -3702,12 +3709,6 @@ static void funcstub(int fnative)
     dim[numdim++]=(int)size;
   } /* while */
 
-  getclassspec(0,&fpublic,&fstatic,&fstock,&fconst);
-  /* a combination of 'public' and 'stock' is already checked in getclassspec() */
-  if (fnative && (fpublic || fstatic || fstock) || (fpublic && fstock))
-    error(42);                  /* invalid combination of class specifiers */
-  else if (fconst)
-    error(10);                  /* illegal function or declaration */
   tok=lex(&val,&str);
 
   if (tok==tOPERATOR) {
