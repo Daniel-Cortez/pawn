@@ -3738,9 +3738,6 @@ static void funcstub(int fnative)
     sym->usage=(short)(uNATIVE | uRETVALUE | uDEFINE | (sym->usage & uPROTOTYPED));
     sym->x.lib=curlibrary;
   } else {
-    if (((sym->usage & uDECLPUBLIC)!=0 && !fpublic) || ((sym->usage & uDECLSTATIC)!=0 && !fstatic)
-        || ((sym->usage & uSTOCK)!=0 && !fstock))
-      error(25);                /* function heading differs from prototype */
     if ((sym->usage & uDEFINE)!=0) {
       /* if the function has already been defined ("finalized"), we can't accept
        * any new class specifiers */
@@ -3888,9 +3885,6 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int fsto
   sym=fetchfunc(symbolname,tag);/* get a pointer to the function entry */
   if (sym==NULL || (sym->usage & uNATIVE)!=0)
     return TRUE;                /* it was recognized as a function declaration, but not as a valid one */
-  if (((sym->usage & uDECLPUBLIC)!=0 && !fpublic) || ((sym->usage & uDECLSTATIC)!=0 && !fstatic)
-      || ((sym->usage & uSTOCK)!=0 && !fstock))
-    error(25);                  /* function heading differs from prototype */
   if (fpublic && opertok==0)
     sym->usage |= (uPUBLIC | uDECLPUBLIC);
   if (fstatic) {
@@ -3932,6 +3926,9 @@ static int newfunc(char *firstname,int firsttag,int fpublic,int fstatic,int fsto
     return TRUE;
   } /* if */
   /* so it is not a prototype, proceed */
+  if (((sym->usage & uDECLPUBLIC)!=0 && !fpublic) || ((sym->usage & uDECLSTATIC)!=0 && !fstatic)
+      || ((sym->usage & uSTOCK)!=0 && !fstock))
+    error(25);                  /* function heading differs from prototype */
   /* if this is a function that is not referred to (this can only be detected
    * in the second stage), shut code generation off */
   if (sc_status==statWRITE && (sym->usage & uREAD)==0 && !fpublic) {
